@@ -5,6 +5,9 @@
 #include "GameFramework/Pawn.h"
 #include "Orbit3DPawn.generated.h"
 
+/*
+Flying pawn actor, based on the example Flying C++ UE4 project.
+*/
 UCLASS(Config=Game)
 class AOrbit3DPawn : public APawn
 {

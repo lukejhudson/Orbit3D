@@ -1,15 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "TimerManager.h"
 #include "GameFramework/Actor.h"
-#include "Runtime/Engine/Classes/Components/SphereComponent.h"
-#include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
-#include "Runtime/Engine/Classes/Materials/Material.h"
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/Material.h"
 #include "Skybox.generated.h"
 
+/*
+Actor handling the sky box (or sky sphere) of the game.
+*/
 UCLASS()
 class ORBIT3D_API ASkybox : public AActor
 {
@@ -28,11 +29,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	USphereComponent *Base;
+	// Sphere mesh and root component of the actor
 	UStaticMeshComponent *SphereMesh;
+	// Material/texture of the mesh (may be altered in the editor)
 	UPROPERTY(EditAnywhere)
 	class UMaterial* Material;
+	// Handles timer to call MoveToPlayer at fixed time intervals
 	FTimerHandle MoveTimerHandle;
+	// Moves the root component to the player's location
 	void MoveToPlayer();
 
 };

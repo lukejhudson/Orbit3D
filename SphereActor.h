@@ -1,13 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Runtime/Engine/Classes/Components/SphereComponent.h"
-#include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/PointLight.h"
 #include "SphereActor.generated.h"
 
+/*
+Actor for a moveable sphere object.
+*/
 UCLASS()
 class ORBIT3D_API ASphereActor : public AActor
 {
@@ -15,7 +17,7 @@ class ORBIT3D_API ASphereActor : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	ASphereActor(const FObjectInitializer& ObjectInitializer);
+	ASphereActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,21 +26,44 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	// Get current scale
+	float GetScale();
+	// Set scale/size of sphere
 	void SetScale(float Scale);
+	// Get current velocity
 	FVector GetVelocity();
+	// Set velocity to Vec
 	void SetVelocity(FVector Vec);
+	// Add Vec to current velocity
 	void IncrementVelocity(FVector Vec);
+	// Get current mass
 	float GetMass();
+	// Set mass to M
 	void SetMass(float M);
+	// Returns true if actor is active
+	bool IsActive();
+
+	// Called when this actor collides with another
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 private:
-	USphereComponent *box;
+	// Mesh and root component of the sphere
 	UStaticMeshComponent *SphereMesh;
 
+	// Is the actor active? False --> remove
+	bool Active = true;
+
+	// Current velocity of the sphere (can be altered in editor)
 	UPROPERTY(EditAnywhere)
 	FVector Velocity;
 
+	// Current mass of the sphere (can be altered in editor)
 	UPROPERTY(EditAnywhere)
 	float Mass;
+
+	// Current scale of the sphere (can be altered in editor)
+	UPROPERTY(EditAnywhere)
+	float Scale;
 
 };

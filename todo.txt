@@ -1,0 +1,16 @@
+Collisions
+	If one planet collides with another, make heavier one consume the other
+Textures
+	Several planet textures (chosen randomly on init)
+	Sun (& dwarf star?)
+Make sun a light source
+	Play around with attenuation etc
+Spawn planetary system
+	Sun in centre
+	Planets spawning around
+	Asteroids / moons spawning?
+Distance between planets & planet sizes?
+Control of spaceship
+	Don't want self righting (maybe just the self righting on turn)
+	Camera of spaceship needs to better follow
+		Might happen automatically once ship controls are improved
