@@ -17,7 +17,8 @@ ASkybox::ASkybox()
 	RootComponent = SphereMesh;
 	// Get the default sphere mesh
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
-	if (SphereMeshAsset.Succeeded()) {
+	if (SphereMeshAsset.Succeeded()) 
+	{
 		SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 		SphereMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		// Make sphere very large
@@ -45,7 +46,8 @@ void ASkybox::BeginPlay()
 
 	// Set timer, ticking every 10 sec
 	// Call function that moves mesh to location of player
-	if (GetWorld()) {
+	if (GetWorld()) 
+	{
 		GetWorldTimerManager().SetTimer(MoveTimerHandle, this, &ASkybox::MoveToPlayer, 1.0f, true);
 	}
 	
@@ -61,8 +63,10 @@ void ASkybox::Tick(float DeltaTime)
 Moves the sky box to be roughly centred on the player of the game. 
 Called by a timer every few seconds.
 */
-void ASkybox::MoveToPlayer() {
-	if (GetWorld() && GetWorld()->GetFirstPlayerController()) {
+void ASkybox::MoveToPlayer() 
+{
+	if (GetWorld() && GetWorld()->GetFirstPlayerController()) 
+	{
 		// Get first player pawn location
 		FVector PawnLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 		//UE_LOG(LogTemp, Warning, TEXT("GetWorld"));

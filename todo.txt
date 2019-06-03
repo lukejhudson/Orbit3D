@@ -1,5 +1,3 @@
-Collisions
-	If one planet collides with another, make heavier one consume the other
 Textures
 	Several planet textures (chosen randomly on init)
 	Sun (& dwarf star?)

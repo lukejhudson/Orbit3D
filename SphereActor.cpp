@@ -21,7 +21,8 @@ ASphereActor::ASphereActor()
 
 	// Get the default sphere mesh
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
-	if (SphereMeshAsset.Succeeded()) {
+	if (SphereMeshAsset.Succeeded()) 
+	{
 		SphereMesh->SetStaticMesh(SphereMeshAsset.Object);
 		SphereMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		SphereMesh->SetWorldScale3D(FVector(Scale));
@@ -34,6 +35,25 @@ ASphereActor::ASphereActor()
 
 	Velocity = FVector(0.f);
 	Mass = DEFAULT_MASS * Scale * Scale;
+
+	// 1/10 chance to become a light source
+	if (std::rand() % 10 == 0) 
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("SphereActor Creating APointLight"));
+		// Create a dynamic point light and attach it to the sphere mesh
+		Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PointLight"));
+		Light->SetMobility(EComponentMobility::Movable);
+		Light->AttachTo(RootComponent);
+		// Make light source about the same size as the sphere
+		Light->SetSourceRadius(250.f * Scale);
+		Light->SetSourceLength(250.f * Scale);
+		// Make the light intensity fall off much more slowly
+		Light->bUseInverseSquaredFalloff = false;
+		Light->SetLightFalloffExponent(16.f);
+		// Make the light reach across the sky sphere
+		Light->SetAttenuationRadius(20000.f);
+		Light->SetIntensity(1000.f);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -65,8 +85,8 @@ void ASphereActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrim
 		if (!OtherSphere->IsActive()) return;
 		// Compare masses
 		float OtherMass = OtherSphere->GetMass();
-		UE_LOG(LogTemp, Warning, TEXT("SphereActor OnHit Before, Mass = %f, OtherMass = %f, Scale = %f, OtherScale = %f, Velocity = %s, OtherVelocity = %s"),
-			Mass, OtherMass, Scale, OtherSphere->GetScale(), *(Velocity.ToString()), *(OtherSphere->GetVelocity().ToString()));
+		//UE_LOG(LogTemp, Warning, TEXT("SphereActor OnHit Before, Mass = %f, OtherMass = %f, Scale = %f, OtherScale = %f, Velocity = %s, OtherVelocity = %s"),
+			//Mass, OtherMass, Scale, OtherSphere->GetScale(), *(Velocity.ToString()), *(OtherSphere->GetVelocity().ToString()));
 		if (Mass > OtherMass) 
 		{
 			// Larger --> Consume; increase in size proportional to other SphereActor
@@ -74,8 +94,8 @@ void ASphereActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrim
 			SetScale(Scale * (1 + (0.5 * OtherMass / Scale) / (Mass / Scale)));
 			Mass += OtherMass;
 			Velocity = (Mass * Velocity + OtherMass * OtherSphere->GetVelocity()) / (Mass + OtherMass);
-			UE_LOG(LogTemp, Warning, TEXT("SphereActor OnHit After, Mass = %f, OtherMass = %f, Scale = %f, OtherScale = %f, Velocity = %s, OtherVelocity = %s"), 
-				Mass, OtherMass, Scale, OtherSphere->GetScale(), *(Velocity.ToString()), *(OtherSphere->GetVelocity().ToString()));
+			//UE_LOG(LogTemp, Warning, TEXT("SphereActor OnHit After, Mass = %f, OtherMass = %f, Scale = %f, OtherScale = %f, Velocity = %s, OtherVelocity = %s"), 
+				//Mass, OtherMass, Scale, OtherSphere->GetScale(), *(Velocity.ToString()), *(OtherSphere->GetVelocity().ToString()));
 		}
 		else
 		{
@@ -92,32 +112,45 @@ void ASphereActor::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrim
 	}
 }
 
-float ASphereActor::GetScale() {
+float ASphereActor::GetScale() 
+{
 	return Scale;
 }
 
-void ASphereActor::SetScale(float Scale) {
+void ASphereActor::SetScale(float Scale) 
+{
 	SphereMesh->SetWorldScale3D(FVector(Scale));
 	this->Scale = Scale;
+	// If this actor has a light source, also scale it by the new scale
+	if (Light)
+	{
+		Light->SetSourceRadius(250.f * Scale);
+		Light->SetSourceLength(250.f * Scale);
+	}
 }
 
-FVector ASphereActor::GetVelocity() {
+FVector ASphereActor::GetVelocity() 
+{
 	return Velocity;
 }
 
-void ASphereActor::SetVelocity(FVector Vec) {
+void ASphereActor::SetVelocity(FVector Vec) 
+{
 	Velocity = Vec;
 }
 
-void ASphereActor::IncrementVelocity(FVector Vec) {
+void ASphereActor::IncrementVelocity(FVector Vec) 
+{
 	Velocity += Vec;
 }
 
-float ASphereActor::GetMass() {
+float ASphereActor::GetMass()
+{
 	return Mass;
 }
 
-void ASphereActor::SetMass(float M) {
+void ASphereActor::SetMass(float M) 
+{
 	Mass = M;
 }
 

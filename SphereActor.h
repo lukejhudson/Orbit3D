@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Engine/PointLight.h"
+#include "Components/PointLightComponent.h"
 #include "SphereActor.generated.h"
 
 /*
@@ -50,6 +50,10 @@ public:
 private:
 	// Mesh and root component of the sphere
 	UStaticMeshComponent *SphereMesh;
+
+	// Point light component
+	UPROPERTY(EditAnywhere)
+		UPointLightComponent *Light;
 
 	// Is the actor active? False --> remove
 	bool Active = true;
