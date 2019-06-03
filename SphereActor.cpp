@@ -33,27 +33,71 @@ ASphereActor::ASphereActor()
 		SphereMesh->OnComponentHit.AddDynamic(this, &ASphereActor::OnHit);
 	}
 
+	// Randomly select material
+	FString MaterialName = "/Game/SpaceTextures/";
+	int MaterialSelector = std::rand() % 9;
+	switch (MaterialSelector) {
+	case 0:
+		MaterialName += "EarthMaterial";
+		break;
+	case 1:
+		MaterialName += "JupiterMaterial";
+		break;
+	case 2:
+		MaterialName += "MarsMaterial";
+		break;
+	case 3:
+		MaterialName += "MercuryMaterial";
+		break;
+	case 4:
+		MaterialName += "MoonMaterial";
+		break;
+	case 5:
+		MaterialName += "SaturnMaterial";
+		break;
+	case 6:
+		MaterialName += "SunMaterial";
+		// Produces light --> Create light source
+		CreatePointLight();
+		break;
+	case 7:
+		MaterialName += "UranusMaterial";
+		break;
+	case 8:
+		MaterialName += "VenusMaterial";
+		break;
+	default:
+		MaterialName += "EarthMaterial";
+	}
+	// Load and set material
+	ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterialAsset(*MaterialName);
+	if (SphereMaterialAsset.Succeeded())
+	{
+		SphereMesh->SetMaterial(0, SphereMaterialAsset.Object);
+	}
+
 	Velocity = FVector(0.f);
 	Mass = DEFAULT_MASS * Scale * Scale;
+}
 
-	// 1/10 chance to become a light source
-	if (std::rand() % 10 == 0) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("SphereActor Creating APointLight"));
-		// Create a dynamic point light and attach it to the sphere mesh
-		Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PointLight"));
-		Light->SetMobility(EComponentMobility::Movable);
-		Light->AttachTo(RootComponent);
-		// Make light source about the same size as the sphere
-		Light->SetSourceRadius(250.f * Scale);
-		Light->SetSourceLength(250.f * Scale);
-		// Make the light intensity fall off much more slowly
-		Light->bUseInverseSquaredFalloff = false;
-		Light->SetLightFalloffExponent(16.f);
-		// Make the light reach across the sky sphere
-		Light->SetAttenuationRadius(20000.f);
-		Light->SetIntensity(1000.f);
-	}
+/*
+Create a Point Light for this actor.
+*/
+void ASphereActor::CreatePointLight() {
+	//UE_LOG(LogTemp, Warning, TEXT("SphereActor Creating APointLight"));
+	// Create a dynamic point light and attach it to the sphere mesh
+	Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PointLight"));
+	Light->SetMobility(EComponentMobility::Movable);
+	Light->AttachTo(RootComponent);
+	// Make light source about the same size as the sphere
+	Light->SetSourceRadius(250.f * Scale);
+	Light->SetSourceLength(250.f * Scale);
+	// Make the light intensity fall off much more slowly
+	Light->bUseInverseSquaredFalloff = false;
+	Light->SetLightFalloffExponent(16.f);
+	// Make the light reach across the sky sphere
+	Light->SetAttenuationRadius(20000.f);
+	Light->SetIntensity(20.f);
 }
 
 // Called when the game starts or when spawned

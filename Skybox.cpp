@@ -23,7 +23,6 @@ ASkybox::ASkybox()
 		SphereMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		// Make sphere very large
 		SphereMesh->SetWorldScale3D(FVector(1000.0f));
-		//SphereMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	}
 	// Create default texture
 	Material = CreateDefaultSubobject<UMaterial>(TEXT("Material"));

@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Materials/Material.h"
 #include "SphereActor.generated.h"
 
 /*
@@ -53,7 +54,11 @@ private:
 
 	// Point light component
 	UPROPERTY(EditAnywhere)
-		UPointLightComponent *Light;
+	UPointLightComponent *Light;
+
+	// Material/texture of the mesh (may be altered in the editor)
+	UPROPERTY(EditAnywhere)
+	class UMaterial* Material;
 
 	// Is the actor active? False --> remove
 	bool Active = true;
@@ -69,5 +74,8 @@ private:
 	// Current scale of the sphere (can be altered in editor)
 	UPROPERTY(EditAnywhere)
 	float Scale;
+
+	// Creates a point light as the Light component
+	void CreatePointLight();
 
 };
