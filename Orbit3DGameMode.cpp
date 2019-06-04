@@ -1,5 +1,12 @@
 #include "Orbit3DGameMode.h"
 #include "Orbit3DPawn.h"
+#include "Kismet/GameplayStatics.h"
+
+#define MAX_SYSTEM_ORBIT_RADIUS 10000.f
+#define MIN_SYSTEM_ORBIT_RADIUS 1000.f
+#define MAX_PLANET_ORBIT_RADIUS 500.f
+#define MIN_PLANETS 5
+#define MAX_PLANETS 15
 
 /*
 Creates and sets default values.
@@ -10,12 +17,15 @@ AOrbit3DGameMode::AOrbit3DGameMode()
 	DefaultPawnClass = AOrbit3DPawn::StaticClass();
 
 	// Start timer to spawn spheres in random locations
-	if (GetWorld()) {
-		GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AOrbit3DGameMode::SpawnSphere, 1.0f, true);
+	if (GetWorld()) 
+	{
+		//GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AOrbit3DGameMode::SpawnSphere, 1.0f, true);
 	}
 
 	// Enable ticks every frame
 	PrimaryActorTick.bCanEverTick = true;
+
+	SpawnPlanetarySystem(FVector(0.f), FVector(0.f));
 }
 
 // Called when the game starts or when spawned
@@ -42,7 +52,7 @@ void AOrbit3DGameMode::Tick(float DeltaTime)
 	// -> Should be able to check for nullptrs and if so mark them for removal
 	// from the ActorArray list after the loop is completed. 
 	// (Could also consider GetAllActorsOfClass(...))
-	for (int i = 0, End = ActorArray.Num(); i < End - 2; i++) 
+	for (int i = 0, End = ActorArray.Num(); i < End - 1; i++) 
 	{
 		// Make sure this actor is valid and active
 		if (ActorArray[i] && ActorArray[i]->IsActive())
@@ -50,7 +60,7 @@ void AOrbit3DGameMode::Tick(float DeltaTime)
 			iActor = ActorArray[i];
 			iMass = iActor->GetMass();
 			iPos = iActor->GetActorLocation();
-			for (int j = i + 1; j < End - 1; j++)
+			for (int j = i + 1; j < End; j++)
 			{
 				// Ensure other actor is valid and active
 				if (ActorArray[j] && ActorArray[j]->IsActive())
@@ -87,7 +97,8 @@ pointer to the actor to the TArray ActorArray.
 */
 void AOrbit3DGameMode::SpawnSphere() {
 	UWorld* World = GetWorld();
-	if (World) {
+	if (World) 
+	{
 		FActorSpawnParameters SpawnParams;
 
 		FVector SpawnLocation;
@@ -103,7 +114,91 @@ void AOrbit3DGameMode::SpawnSphere() {
 
 }
 
+/*
+Spawns NewSphere at a random distance away from Central, according to MaxOrbitDistance, 
+then calculates the velocity required to stay in orbit. 
+Vector calculations with help from:
+https://math.stackexchange.com/questions/2347215/how-to-find-a-random-unit-vector-orthogonal-to-a-random-unit-vector-in-3d/2347293
+*/
+void AOrbit3DGameMode::CalculateOrbitVelocity(ASphereActor *NewSphere, ASphereActor *Central, float MaxOrbitDistance)
+{
+	// Random unit vector * random acceptable radius to find random point inside sphere
+	float Radius = FMath::FRandRange(MIN_SYSTEM_ORBIT_RADIUS, MaxOrbitDistance);
+	FVector Pos = Central->GetActorLocation() + FMath::VRand() * Radius;
+	// Calculate required speed of the new ASphereActor
+	// s = sqrt( (G * CentralMass) / radius of orbit )
+	float Speed = 10 * FMath::Sqrt((G * Central->GetMass()) / Radius);
+	// Take a simple perpendicular vector
+	FVector Perp(Pos.Y, -Pos.X, 0);
+	// Calculate cross product between Pos and Perp
+	FVector V = FVector::CrossProduct(Pos, Perp);
+	float Theta = FMath::FRandRange(0, 2 * PI);
+	FVector Vel = Speed * (FMath::Cos(Theta) * Perp.GetSafeNormal() + FMath::Sin(Theta) * V.GetSafeNormal());
 
+	UWorld *World = GetWorld();
+	if (World)
+	{
+		NewSphere->SetVelocity(Vel);
+		UE_LOG(LogTemp, Warning, TEXT("AOrbit3DGameMode::CalculateOrbitVelocity Vel = %s, Speed = %f, Radius = %f, CentralMass = %f, G = %f"),
+			*(Vel.ToString()), Speed, Radius, Central->GetMass(), G);
+		UGameplayStatics::FinishSpawningActor(NewSphere, FTransform(Pos));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AOrbit3DGameMode::CalculateOrbitVelocity Failed to spawn sphere"));
+	}
+}
+
+/*
+Spawns a planetary system with the centre being the given Central ASphereActor. A random number 
+of planets are spawned in orbit of the given central sphere, with a random number of asteroids 
+orbiting those planets.
+*/
+void AOrbit3DGameMode::SpawnPlanetarySystem(ASphereActor *Central)
+{
+	TArray<ASphereActor*> NewPlanets;
+	ASphereActor *NewPlanet;
+
+	// Generate between 2 and 5 planets around the central sphere
+	int NumPlanets = MIN_PLANETS + FMath::RandHelper(MAX_PLANETS);
+	for (int i = 0; i < NumPlanets; i++) {
+		NewPlanet = Cast<ASphereActor>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, ASphereActor::StaticClass(), FTransform()));
+		NewPlanet->SetType(ASphereActor::Planet);
+		CalculateOrbitVelocity(NewPlanet, Central, MAX_SYSTEM_ORBIT_RADIUS);
+		NewPlanets.Add(NewPlanet);
+	}
+
+	ActorArray.Add(Central);
+	ActorArray.Append(NewPlanets);
+}
+
+/*
+Spawns a planetary system with the centre at the given position Pos and velocity Vel. A random 
+number of planets are then spawned in orbit around this body, with a random number of asteroids 
+orbiting those planets.
+*/
+void AOrbit3DGameMode::SpawnPlanetarySystem(FVector Pos, FVector Vel)
+{
+	UWorld *World = GetWorld();
+	if (World)
+	{
+		// Deferred spawn - create the object, but don't spawn it until we've initialised it
+		ASphereActor *Sphere = Cast<ASphereActor>(UGameplayStatics::BeginDeferredActorSpawnFromClass(this, ASphereActor::StaticClass(), FTransform()));
+		//ASphereActor *Sphere = World->SpawnActor<ASphereActor>(Pos, FRotator::ZeroRotator);
+
+		if (Sphere != nullptr)
+		{
+			// Init values
+			Sphere->SetVelocity(Vel);
+			Sphere->SetType(ASphereActor::Sun);
+
+			// Finish spawning
+			UGameplayStatics::FinishSpawningActor(Sphere, FTransform(Pos));
+
+			SpawnPlanetarySystem(Sphere);
+		}
+	}
+}
 
 
 

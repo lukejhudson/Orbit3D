@@ -35,9 +35,16 @@ private:
 	// Tracks the time since the game began
 	float RunningTime;
 
+	// Calc position and velocity for NewSphere being spawned in orbit around the given central sphere
+	void CalculateOrbitVelocity(ASphereActor *NewSphere, ASphereActor *Central, float MaxOrbitDistance);
+	// Spawns a planetary system with the centre being the given ASphereActor
+	void SpawnPlanetarySystem(ASphereActor *Central);
+	// Spawns a planetary system with the centre at the given position Pos and velocity Vel
+	void SpawnPlanetarySystem(FVector Pos, FVector Vel);
+
 	// Gravitational constant (can be altered in the editor)
 	UPROPERTY(EditAnywhere)
-	float G = 10.0f;
+	float G = 2.0f;
 };
 
 

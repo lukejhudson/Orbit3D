@@ -33,10 +33,24 @@ ASphereActor::ASphereActor()
 		SphereMesh->OnComponentHit.AddDynamic(this, &ASphereActor::OnHit);
 	}
 
+	// TODO: Organise these better
+	TArray<FString> MaterialNames = { "SunMaterial", "EarthMaterial", "JupiterMaterial", "MarsMaterial", "MercuryMaterial", 
+		"SaturnMaterial", "UranusMaterial", "VenusMaterial", "MoonMaterial" };
+
+	for (int i = 0; i < MaterialNames.Num(); i++) 
+	{
+		ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterialAsset(*("/Game/SpaceTextures/" + MaterialNames[i]));
+		if (SphereMaterialAsset.Succeeded())
+		{
+			LoadedMaterials.Add(SphereMaterialAsset.Object);
+		}
+	}
+	/*
 	// Randomly select material
 	FString MaterialName = "/Game/SpaceTextures/";
 	int MaterialSelector = std::rand() % 9;
-	switch (MaterialSelector) {
+	switch (MaterialSelector) 
+	{
 	case 0:
 		MaterialName += "EarthMaterial";
 		break;
@@ -57,8 +71,6 @@ ASphereActor::ASphereActor()
 		break;
 	case 6:
 		MaterialName += "SunMaterial";
-		// Produces light --> Create light source
-		CreatePointLight();
 		break;
 	case 7:
 		MaterialName += "UranusMaterial";
@@ -75,6 +87,9 @@ ASphereActor::ASphereActor()
 	{
 		SphereMesh->SetMaterial(0, SphereMaterialAsset.Object);
 	}
+	*/
+	// Create default light source
+	CreatePointLight();
 
 	Velocity = FVector(0.f);
 	Mass = DEFAULT_MASS * Scale * Scale;
@@ -88,10 +103,7 @@ void ASphereActor::CreatePointLight() {
 	// Create a dynamic point light and attach it to the sphere mesh
 	Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PointLight"));
 	Light->SetMobility(EComponentMobility::Movable);
-	Light->AttachTo(RootComponent);
-	// Make light source about the same size as the sphere
-	Light->SetSourceRadius(250.f * Scale);
-	Light->SetSourceLength(250.f * Scale);
+
 	// Make the light intensity fall off much more slowly
 	Light->bUseInverseSquaredFalloff = false;
 	Light->SetLightFalloffExponent(16.f);
@@ -104,6 +116,28 @@ void ASphereActor::CreatePointLight() {
 void ASphereActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	switch (Type)
+	{
+	case Sun:
+		Light->SetWorldLocation(FVector(0.f, 0.f, 50.f));
+		Light->AttachTo(RootComponent);
+		SphereMesh->SetMaterial(0, LoadedMaterials[0]);
+		Scale = FMath::FRandRange(7.f, 10.f);
+		break;
+	case Planet:
+		Light->SetVisibility(false);
+		SphereMesh->SetMaterial(0, LoadedMaterials[1 + FMath::RandHelper(6)]);
+		Scale = FMath::FRandRange(2.f, 4.f);
+		break;
+	case Asteroid:
+		Light->SetVisibility(false);
+		SphereMesh->SetMaterial(0, LoadedMaterials[8]);
+		Scale = FMath::FRandRange(0.5f, 1.5f);
+		break;
+	}
+	SetScale(Scale);
+	Mass = DEFAULT_MASS * Scale * Scale * Scale;
 }
 
 // Called every frame
@@ -168,7 +202,8 @@ void ASphereActor::SetScale(float Scale)
 	// If this actor has a light source, also scale it by the new scale
 	if (Light)
 	{
-		Light->SetSourceRadius(250.f * Scale);
+		// Make light source about the same size as the sphere
+		Light->SetSourceRadius(100.f * Scale);
 		Light->SetSourceLength(250.f * Scale);
 	}
 }
@@ -201,4 +236,14 @@ void ASphereActor::SetMass(float M)
 bool ASphereActor::IsActive()
 {
 	return Active;
+}
+
+int ASphereActor::GetType()
+{
+	return Type;
+}
+
+void ASphereActor::SetType(SphereType T)
+{
+	Type = T;
 }

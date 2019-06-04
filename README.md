@@ -15,3 +15,8 @@ A 3D adaptation of the Exploration mode in my orbit-sandbox project, created usi
 03/06/19: Each sphere now randomly chooses 1 of 9 materials when it is spawned. If the material chosen is the Sun material, a point light component is created and attached to the sphere.
 
 ![Materials](Screenshots/Materials3.png)
+
+
+04/06/19: Planetary systems can now be spawned. One such system is spawned at the beginning of the game, creating a central Sun and many surrounding planets in random orbits. 
+
+![Planetary Systems](Screenshots/PlanetarySystems.png)

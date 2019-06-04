@@ -1,9 +1,14 @@
 Spawn planetary system
 	Sun in centre
+		Need to be able to specify what type of body a ASphereActor is
+		Need more realistic sizes and masses 
 	Planets spawning around
 	Asteroids / moons spawning?
+	Play around with spawning orbit velocities / G constant to make orbits more stable
+	Calculated orbit velocities should be affected by the velocity of the central body
 Distance between planets & planet sizes?
 Control of spaceship
 	Don't want self righting (maybe just the self righting on turn)
 	Camera of spaceship needs to better follow
 		Might happen automatically once ship controls are improved
+Apply gravity to spaceship

@@ -17,6 +17,14 @@ class ORBIT3D_API ASphereActor : public AActor
 	GENERATED_BODY()
 	
 public:	
+
+	enum SphereType 
+	{
+		Sun = 0,
+		Planet = 1,
+		Asteroid = 2
+	};
+
 	// Sets default values for this actor's properties
 	ASphereActor();
 
@@ -43,6 +51,10 @@ public:
 	void SetMass(float M);
 	// Returns true if actor is active
 	bool IsActive();
+	// Get current type
+	int GetType();
+	// Set type to SphereType T
+	void SetType(SphereType T);
 
 	// Called when this actor collides with another
 	UFUNCTION()
@@ -60,8 +72,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UMaterial* Material;
 
+	// Array of all materials, loaded once
+	TArray<UMaterial*> LoadedMaterials;
+
 	// Is the actor active? False --> remove
+	UPROPERTY(EditAnywhere)
 	bool Active = true;
+
+	// What kind of celestial body this sphere represents
+	SphereType Type = Planet;
 
 	// Current velocity of the sphere (can be altered in editor)
 	UPROPERTY(EditAnywhere)
