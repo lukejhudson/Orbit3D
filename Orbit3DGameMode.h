@@ -36,7 +36,7 @@ private:
 	float RunningTime;
 
 	// Calc position and velocity for NewSphere being spawned in orbit around the given central sphere
-	void CalculateOrbitVelocity(ASphereActor *NewSphere, ASphereActor *Central, float MaxOrbitDistance);
+	void CalculateOrbitVelocity(ASphereActor *NewSphere, ASphereActor *Central, float MinOrbitDistance, float MaxOrbitDistance);
 	// Spawns a planetary system with the centre being the given ASphereActor
 	void SpawnPlanetarySystem(ASphereActor *Central);
 	// Spawns a planetary system with the centre at the given position Pos and velocity Vel

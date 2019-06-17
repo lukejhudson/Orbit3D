@@ -29,6 +29,8 @@ ASkybox::ASkybox()
 
 	// Disable collisions
 	SetActorEnableCollision(false);
+	// Disable shadows
+	//SphereMesh->bCastDynamicShadow = false;
 }
 
 /*

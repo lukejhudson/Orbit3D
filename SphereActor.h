@@ -22,7 +22,7 @@ public:
 	{
 		Sun = 0,
 		Planet = 1,
-		Asteroid = 2
+		Moon = 2
 	};
 
 	// Sets default values for this actor's properties
@@ -93,6 +93,14 @@ private:
 	// Current scale of the sphere (can be altered in editor)
 	UPROPERTY(EditAnywhere)
 	float Scale;
+
+	// The angle of tilt, e.g. Earth is tilted at 23.5 degrees
+	UPROPERTY(EditAnywhere)
+	float Tilt;
+
+	// Speed of rotation about the tilted axis
+	UPROPERTY(EditAnywhere)
+	float RotationSpeed;
 
 	// Creates a point light as the Light component
 	void CreatePointLight();

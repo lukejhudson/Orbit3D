@@ -30,6 +30,7 @@ public:
 
 private:
 	// Sphere mesh and root component of the actor
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent *SphereMesh;
 	// Material/texture of the mesh (may be altered in the editor)
 	UPROPERTY(EditAnywhere)

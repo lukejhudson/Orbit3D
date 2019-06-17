@@ -35,7 +35,7 @@ ASphereActor::ASphereActor()
 
 	// TODO: Organise these better
 	TArray<FString> MaterialNames = { "SunMaterial", "EarthMaterial", "JupiterMaterial", "MarsMaterial", "MercuryMaterial", 
-		"SaturnMaterial", "UranusMaterial", "VenusMaterial", "MoonMaterial" };
+		"NeptuneMaterial", "SaturnMaterial", "UranusMaterial", "VenusMaterial", "MoonMaterial" };
 
 	for (int i = 0; i < MaterialNames.Num(); i++) 
 	{
@@ -45,54 +45,19 @@ ASphereActor::ASphereActor()
 			LoadedMaterials.Add(SphereMaterialAsset.Object);
 		}
 	}
-	/*
-	// Randomly select material
-	FString MaterialName = "/Game/SpaceTextures/";
-	int MaterialSelector = std::rand() % 9;
-	switch (MaterialSelector) 
-	{
-	case 0:
-		MaterialName += "EarthMaterial";
-		break;
-	case 1:
-		MaterialName += "JupiterMaterial";
-		break;
-	case 2:
-		MaterialName += "MarsMaterial";
-		break;
-	case 3:
-		MaterialName += "MercuryMaterial";
-		break;
-	case 4:
-		MaterialName += "MoonMaterial";
-		break;
-	case 5:
-		MaterialName += "SaturnMaterial";
-		break;
-	case 6:
-		MaterialName += "SunMaterial";
-		break;
-	case 7:
-		MaterialName += "UranusMaterial";
-		break;
-	case 8:
-		MaterialName += "VenusMaterial";
-		break;
-	default:
-		MaterialName += "EarthMaterial";
-	}
-	// Load and set material
-	ConstructorHelpers::FObjectFinder<UMaterial> SphereMaterialAsset(*MaterialName);
-	if (SphereMaterialAsset.Succeeded())
-	{
-		SphereMesh->SetMaterial(0, SphereMaterialAsset.Object);
-	}
-	*/
+
 	// Create default light source
 	CreatePointLight();
 
+	// Set velocity to 0
 	Velocity = FVector(0.f);
-	Mass = DEFAULT_MASS * Scale * Scale;
+	// Calculate initial mass
+	Mass = DEFAULT_MASS * Scale * Scale * Scale;
+	// Tilt the sphere between 0 and 180 degrees
+	Tilt = FMath::FRandRange(0.f, 180.f);
+	AddActorWorldRotation(FRotator(Tilt, 0.f, 0.f));
+	// Randomise rotation speed
+	RotationSpeed = FMath::FRandRange(0.f, 2.f);
 }
 
 /*
@@ -109,7 +74,7 @@ void ASphereActor::CreatePointLight() {
 	Light->SetLightFalloffExponent(16.f);
 	// Make the light reach across the sky sphere
 	Light->SetAttenuationRadius(20000.f);
-	Light->SetIntensity(20.f);
+	Light->SetIntensity(10.f);
 }
 
 // Called when the game starts or when spawned
@@ -117,35 +82,34 @@ void ASphereActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Set material and whether or not the actor should have a light component
 	switch (Type)
 	{
 	case Sun:
 		Light->SetWorldLocation(FVector(0.f, 0.f, 50.f));
 		Light->AttachTo(RootComponent);
 		SphereMesh->SetMaterial(0, LoadedMaterials[0]);
-		Scale = FMath::FRandRange(7.f, 10.f);
 		break;
 	case Planet:
 		Light->SetVisibility(false);
-		SphereMesh->SetMaterial(0, LoadedMaterials[1 + FMath::RandHelper(6)]);
-		Scale = FMath::FRandRange(2.f, 4.f);
+		SphereMesh->SetMaterial(0, LoadedMaterials[1 + FMath::RandHelper(7)]);
 		break;
-	case Asteroid:
+	case Moon:
 		Light->SetVisibility(false);
-		SphereMesh->SetMaterial(0, LoadedMaterials[8]);
-		Scale = FMath::FRandRange(0.5f, 1.5f);
+		SphereMesh->SetMaterial(0, LoadedMaterials[9]);
 		break;
 	}
-	SetScale(Scale);
-	Mass = DEFAULT_MASS * Scale * Scale * Scale;
 }
 
 // Called every frame
 void ASphereActor::Tick(float DeltaTime)
 {
+	// Rotate actor about tilt axis
+	AddActorLocalRotation(FRotator(0.f, RotationSpeed, 0.f));
+
 	// Update the actor's location based on the current velocity
 	// (with sweep so we stop when we collide with things and trigger OnHit events)
-	AddActorLocalOffset(Velocity, true);
+	AddActorWorldOffset(Velocity, true);
 
 	Super::Tick(DeltaTime);
 }
@@ -246,4 +210,20 @@ int ASphereActor::GetType()
 void ASphereActor::SetType(SphereType T)
 {
 	Type = T;
+
+	// Set scale and mass based on new type
+	switch (Type)
+	{
+	case Sun:
+		Scale = FMath::FRandRange(7.f, 10.f);
+		break;
+	case Planet:
+		Scale = FMath::FRandRange(2.f, 4.f);
+		break;
+	case Moon:
+		Scale = FMath::FRandRange(0.5f, 1.f);
+		break;
+	}
+	SetScale(Scale);
+	Mass = DEFAULT_MASS * Scale * Scale * Scale;
 }
