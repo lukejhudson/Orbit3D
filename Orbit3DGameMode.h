@@ -44,7 +44,7 @@ private:
 
 	// Gravitational constant (can be altered in the editor)
 	UPROPERTY(EditAnywhere)
-	float G = 2.0f;
+	float G = 2000.0f;
 };
 
 

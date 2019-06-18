@@ -57,7 +57,7 @@ ASphereActor::ASphereActor()
 	Tilt = FMath::FRandRange(0.f, 180.f);
 	AddActorWorldRotation(FRotator(Tilt, 0.f, 0.f));
 	// Randomise rotation speed
-	RotationSpeed = FMath::FRandRange(0.f, 2.f);
+	RotationSpeed = FMath::FRandRange(0.f, 100.f);
 }
 
 /*
@@ -74,7 +74,7 @@ void ASphereActor::CreatePointLight() {
 	Light->SetLightFalloffExponent(16.f);
 	// Make the light reach across the sky sphere
 	Light->SetAttenuationRadius(20000.f);
-	Light->SetIntensity(10.f);
+	Light->SetIntensity(2.f);
 }
 
 // Called when the game starts or when spawned
@@ -104,12 +104,13 @@ void ASphereActor::BeginPlay()
 // Called every frame
 void ASphereActor::Tick(float DeltaTime)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("SphereActor DeltaTime = %f"), DeltaTime);
 	// Rotate actor about tilt axis
-	AddActorLocalRotation(FRotator(0.f, RotationSpeed, 0.f));
+	AddActorLocalRotation(FRotator(0.f, RotationSpeed * DeltaTime, 0.f));
 
 	// Update the actor's location based on the current velocity
 	// (with sweep so we stop when we collide with things and trigger OnHit events)
-	AddActorWorldOffset(Velocity, true);
+	AddActorWorldOffset(Velocity * DeltaTime, true);
 
 	Super::Tick(DeltaTime);
 }

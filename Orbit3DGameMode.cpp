@@ -20,10 +20,10 @@ AOrbit3DGameMode::AOrbit3DGameMode()
 	DefaultPawnClass = AOrbit3DPawn::StaticClass();
 
 	// Start timer to spawn spheres in random locations
-	if (GetWorld()) 
-	{
-		//GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AOrbit3DGameMode::SpawnSphere, 1.0f, true);
-	}
+	//if (GetWorld()) 
+	//{
+	//	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AOrbit3DGameMode::SpawnSphere, 1.0f, true);
+	//}
 
 	// Enable ticks every frame
 	PrimaryActorTick.bCanEverTick = true;
@@ -49,6 +49,13 @@ void AOrbit3DGameMode::Tick(float DeltaTime)
 	float iMass, jMass, DistCubed;
 	FVector iPos, jPos;
 	ASphereActor *iActor, *jActor;
+	
+	AOrbit3DPawn *Pawn = Cast<AOrbit3DPawn>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetViewTarget());
+	FVector PawnPos;
+	if (Pawn != nullptr)
+	{
+		PawnPos = Pawn->GetActorLocation();
+	}
 
 	// When an actor is removed, all references are set to nullptr and its memory
 	// is cleaned up by the garbage collector at a later time
@@ -63,6 +70,13 @@ void AOrbit3DGameMode::Tick(float DeltaTime)
 			iActor = ActorArray[i];
 			iMass = iActor->GetMass();
 			iPos = iActor->GetActorLocation();
+
+			// Calculate force on the player's ship
+			if (Pawn != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AOrbit3DGameMode::Tick Increment pawn velocity"));
+				Pawn->IncrementVelocity(DeltaTime * ((G * iMass * (iPos - PawnPos)) / FMath::Pow(FVector::Dist(iPos, PawnPos), 3.f)));
+			}
 			for (int j = i + 1; j < End; j++)
 			{
 				// Ensure other actor is valid and active
@@ -77,8 +91,8 @@ void AOrbit3DGameMode::Tick(float DeltaTime)
 
 					DistCubed = FMath::Pow(FVector::Dist(iPos, jPos), 3.f);
 
-					iActor->IncrementVelocity((G * jMass * (jPos - iPos)) / DistCubed);
-					jActor->IncrementVelocity((G * iMass * (iPos - jPos)) / DistCubed);
+					iActor->IncrementVelocity(DeltaTime * ((G * jMass * (jPos - iPos)) / DistCubed));
+					jActor->IncrementVelocity(DeltaTime * ((G * iMass * (iPos - jPos)) / DistCubed));
 
 					//if (i == 0)
 					//{

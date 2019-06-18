@@ -1,18 +1,32 @@
-Control of spaceship
-	Don't want self righting (maybe just the self righting on turn)
-	Camera of spaceship needs to better follow
-		Might happen automatically once ship controls are improved
-Apply gravity to spaceship
+Gravity may not be being applied correctly to ship
+	Might need to just have 1 velocity, rather than ThrustMove and Velocity
+	Velocity starts at 500,0,0, and must be adjusted as the pitch and yaw change
 Afterburners for spaceship
 	Use up fuel, gain fuel over time
 	UI element
+	Speedometer as well
 Improve moon spawning
 	Have number of moons spawning around a planet be based on the planet's size?
 	Closer to sun means the moon needs to spawn closer to the planet it orbits so the sun doesn't pull it out of orbit
 		Or just need min distance from sun in order for moons to spawn
+Better looking spaceship
+	New mesh
+	New texture
+	Engine animation, growing as the ship gets faster, or maybe just while accelerating
+Gravity should be stronger?
+
+
+Camera control of spaceship
+	May want to make the camera not follow the ship's rotation while the the camera is being manually controlled
+	Maybe control the spaceship by dragging right click
 
 DONE:
-	Fixed bug that made the spawning velocity much too low - Initial orbit velocity is now correct and much more visually accurate
-	Initial orbit velocities are now affected by the velocity of the central body
-	A random number of moons (0-3) now spawn in orbit around each planet within a planetary system
-	All spheres now have an axis that is rotated between 0 and 180 degrees, and the sphere rotate about this axis at a random speed
+	Played around with spaceship control to suit the space environtment
+		A & D to adjust roll
+		Q & E to adjust yaw
+		Removed self-righting of roll
+	Played around with camera control
+		Small amount of lag added to give more of a sense of speed, so distance between camera and spaceship increases as the spaceship's speed increases
+		Small amount of rotation lag to give a better sense of how the spaceship is moving
+		Player can manually control the camera by holding LMB and dragging the mouse. The camera rotates about the spaceship and will move back to its default position when LMB is released
+	Gravity is now applied to the spaceship

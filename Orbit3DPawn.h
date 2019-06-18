@@ -32,6 +32,9 @@ public:
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	// End AActor overrides
 
+	// Add Vec to current velocity
+	void IncrementVelocity(FVector Vec);
+
 protected:
 
 	// Begin APawn overrides
@@ -44,8 +47,23 @@ protected:
 	/** Bound to the vertical axis */
 	void MoveUpInput(float Val);
 
-	/** Bound to the horizontal axis */
+	/** Bound to the horizontal axis */ // Default yaw and roll behaviour
 	void MoveRightInput(float Val);
+
+	/** Bound to the horizontal axis */ // Custom roll behaviour
+	void RollRightInput(float Val);
+
+	/** Enable the user to have manual control of the camera (while LMB is held down) */
+	void EnableManualCameraInput();
+
+	/** Disable the user's manual control of the camera */
+	void DisableManualCameraInput();
+
+	/** While LMB is held down, handles user's X control of the camera */
+	void ControlManualCameraInputX(float Val);
+
+	/** While LMB is held down, handles user's Y control of the camera */
+	void ControlManualCameraInputY(float Val);
 
 private:
 
@@ -76,6 +94,12 @@ private:
 
 	/** Current roll speed */
 	float CurrentRollSpeed;
+
+	/* Current velocity vector */
+	FVector Velocity;
+
+	/* Does the player have manual control over the camera (LMB down)? */
+	bool bIsManualCamera = false;
 
 public:
 	/** Returns PlaneMesh subobject **/
